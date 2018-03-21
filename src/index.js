@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import React, { PureComponent } from 'react';
-import { View, Animated, Dimensions, ListViewDataSource } from 'react-native';
+import React, {PureComponent} from 'react';
+import {Animated, Dimensions, ListViewDataSource, View} from 'react-native';
 import PropTypes from 'prop-types';
 /* eslint-enable import/no-extraneous-dependencies */
 
@@ -28,6 +28,7 @@ export default class ParallaxScroll extends PureComponent {
     isHeaderFixed: PropTypes.bool,
     onHeaderFixed: PropTypes.func,
     parallaxHeight: PropTypes.number,
+    parallaxMinHeight: PropTypes.number,
     useNativeDriver: PropTypes.bool,
     scrollableComponent: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     isBackgroundScalable: PropTypes.bool,
@@ -173,7 +174,7 @@ export default class ParallaxScroll extends PureComponent {
     return this.props.renderItem(e);
   };
 
-  _renderEmptyView = () => <View style={{ height: this.props.parallaxHeight }} />;
+  _renderEmptyView = () => <View style={{height: this.props.parallaxHeight}}/>;
 
   _ref = ref => {
     if (typeof this.props.innerRef === 'function' && ref && ref._component) {
@@ -185,6 +186,7 @@ export default class ParallaxScroll extends PureComponent {
     const {
       width,
       parallaxHeight: height,
+      parallaxMinHeight: minHeight,
       isBackgroundScalable,
       renderParallaxBackground,
       fadeOutParallaxBackground,
@@ -195,30 +197,30 @@ export default class ParallaxScroll extends PureComponent {
     const translateY = !height
       ? 0
       : this.scrollY.interpolate({
-          inputRange: [0, height],
-          outputRange: [0, -(height / parallaxBackgroundScrollSpeed)],
-          extrapolateRight: 'extend',
-          extrapolateLeft: 'clamp'
-        });
+        inputRange: [0, height],
+        outputRange: [0, -(height / parallaxBackgroundScrollSpeed)],
+        extrapolateRight: 'extend',
+        extrapolateLeft: 'clamp'
+      });
 
     const scale =
       !isBackgroundScalable || !height
         ? 1
         : this.scrollY.interpolate({
-            inputRange: [-height, 0],
-            outputRange: [3, 1],
-            extrapolateLeft: 'extend',
-            extrapolateRight: 'clamp'
-          });
+          inputRange: [-height, 0],
+          outputRange: [3, 1],
+          extrapolateLeft: 'extend',
+          extrapolateRight: 'clamp'
+        });
 
     const opacity =
       !fadeOutParallaxBackground || !height
         ? 1
         : this.scrollY.interpolate({
-            inputRange: [0, height],
-            outputRange: [1, 0],
-            extrapolate: 'clamp'
-          });
+          inputRange: [0, height],
+          outputRange: [1, 0],
+          extrapolate: 'clamp'
+        });
     /* eslint-enable indent */
 
     return (
@@ -228,11 +230,11 @@ export default class ParallaxScroll extends PureComponent {
           width,
           height,
           opacity,
-          transform: [{ translateY }, { scale }]
+          transform: [{translateY}, {scale}]
         }}
         pointerEvents="box-none"
       >
-        {renderParallaxBackground({ width, height, animatedValue: this.scrollY })}
+        {renderParallaxBackground({width, height, animatedValue: this.scrollY})}
       </Animated.View>
     );
   }
@@ -241,31 +243,45 @@ export default class ParallaxScroll extends PureComponent {
     const {
       width,
       parallaxHeight: height,
+      parallaxMinHeight: minHeight,
+      isForegroundScalable,
       renderParallaxForeground,
       fadeOutParallaxForeground,
       parallaxForegroundScrollSpeed
     } = this.props;
 
+    let inputRange = minHeight ? minHeight : height;
+    let outputRange = minHeight ? height - minHeight : height / parallaxForegroundScrollSpeed;
+
     /* eslint-disable indent */
     const translateY = !height
       ? 1
       : this.scrollY.interpolate({
-          inputRange: [0, height],
-          outputRange: [0, -(height / parallaxForegroundScrollSpeed)],
-          extrapolateRight: 'extend',
-          extrapolateLeft: 'clamp'
-        });
-
+        inputRange: [0, inputRange],
+        outputRange: [0, -outputRange],
+        extrapolateRight: minHeight ? 'clamp' : 'extend',
+        extrapolateLeft: 'clamp'
+      });
     const opacity =
       !fadeOutParallaxForeground || !height
         ? 1
         : this.scrollY.interpolate({
-            inputRange: [0, height],
-            outputRange: [1, 0],
-            extrapolateRight: 'extend',
-            extrapolateLeft: 'clamp'
-          });
+          inputRange: [0, height],
+          outputRange: [1, 0],
+          extrapolateRight: 'extend',
+          extrapolateLeft: 'clamp'
+        });
     /* eslint-disable indent */
+
+    const scale =
+      !isForegroundScalable || !height
+        ? 1
+        : this.scrollY.interpolate({
+          inputRange: [-height, 0],
+          outputRange: [3, 1],
+          extrapolateLeft: 'extend',
+          extrapolateRight: 'clamp'
+        });
 
     const wrapperStyle = {
       position: 'absolute',
@@ -283,11 +299,11 @@ export default class ParallaxScroll extends PureComponent {
             width,
             height,
             opacity,
-            transform: [{ translateY }]
+            transform: [{translateY}, {scale}]
           }}
           pointerEvents="box-none"
         >
-          {renderParallaxForeground({ width, height, animatedValue: this.scrollY })}
+          {renderParallaxForeground({width, height, animatedValue: this.scrollY})}
         </Animated.View>
       </View>
     );
