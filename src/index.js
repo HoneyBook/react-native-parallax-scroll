@@ -249,16 +249,16 @@ export default class ParallaxScroll extends PureComponent {
       fadeOutParallaxForeground,
       parallaxForegroundScrollSpeed
     } = this.props;
-
+    
     let inputRange = minHeight ? minHeight : height;
-    let outputRange = minHeight ? height - minHeight : height / parallaxForegroundScrollSpeed;
+    let outputRange = (minHeight ? (minHeight-height) : -height) / parallaxForegroundScrollSpeed;
 
     /* eslint-disable indent */
     const translateY = !height
       ? 1
       : this.scrollY.interpolate({
-        inputRange: [0, inputRange],
-        outputRange: [0, -outputRange],
+        inputRange: [0, height],
+        outputRange: [0, outputRange],
         extrapolateRight: minHeight ? 'clamp' : 'extend',
         extrapolateLeft: 'clamp'
       });
