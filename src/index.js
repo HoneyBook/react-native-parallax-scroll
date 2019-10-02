@@ -174,7 +174,7 @@ export default class ParallaxScroll extends PureComponent {
     return this.props.renderItem(e);
   };
 
-  _renderEmptyView = () => <View style={{height: this.props.parallaxHeight}}/>;
+  _renderEmptyView = () => <View style={{height: this.props.unusableSpace? this.props.parallaxHeight - this.props.unusableSpace : this.props.parallaxHeight}}/>;
 
   _ref = ref => {
     if (typeof this.props.innerRef === 'function' && ref && ref._component) {
@@ -249,7 +249,7 @@ export default class ParallaxScroll extends PureComponent {
       fadeOutParallaxForeground,
       parallaxForegroundScrollSpeed
     } = this.props;
-    
+
     let outputRange = minHeight ? (minHeight-height) : -height / parallaxForegroundScrollSpeed;
 
     /* eslint-disable indent */
@@ -261,6 +261,7 @@ export default class ParallaxScroll extends PureComponent {
         extrapolateRight: minHeight ? 'clamp' : 'extend',
         extrapolateLeft: 'clamp'
       });
+
     const opacity =
       !fadeOutParallaxForeground || !height
         ? 1
